@@ -92,6 +92,27 @@ ai:
 api:
   docs_enabled: false
 
+# ── Self-repair ───────────────────────────────────────────────────────────
+# SentinelReady checks its own pattern library once a day and repairs entries
+# that have become unusable. Three things can happen to a learned verdict:
+#
+#   - it gets flagged for review, which blocks it from ever being reused, so
+#     the pattern pays for a full AI call every time it fires
+#   - a verdict about several alerts firing together gets stored against one
+#     of them, so that alert later serves a judgement about an incident that
+#     is not happening
+#   - the stored verdict and its summary drift apart, which stops the pattern
+#     from ever gaining confidence
+#
+# None of these heal on their own: the pattern is either never reused (so
+# never re-examined) or always reused (so never re-examined). Repair clears
+# the bad verdict; the next occurrence is analysed fresh.
+#
+# Runs at 03:00 local. Set another hour, or null to disable and run it
+# yourself with `--poison --clean`.
+maintenance:
+  poison_check_hour: 3
+
 customer:
   # Your team or company name — used to tag all alerts and patterns
   default_code: myteam

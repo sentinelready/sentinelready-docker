@@ -816,6 +816,47 @@ correlation-combo answers too, which it always should have.
 
 ---
 
+## Keeping the Pattern Library Healthy
+
+SentinelReady learns a verdict for each alert pattern and reuses it, which is
+what makes repeat alerts instant and free. Occasionally a stored verdict goes
+bad — and because a bad verdict is either never reused or always reused, it
+never gets re-examined on its own.
+
+It checks for this daily at 03:00 and repairs what it finds. You can also look
+yourself:
+
+```bash
+docker compose exec sentinelready sentinelready --poison
+```
+
+That shows what is wrong and changes nothing. It reports three things:
+
+| | what it means |
+|---|---|
+| **correlation verdict** | a judgement about several alerts firing together, stored against one of them. That alert now serves a verdict about an incident that is not happening. |
+| **requires review** | the AI flagged the verdict for review, which blocks reuse permanently. The pattern pays for a full AI call every time it fires. |
+| **column drift** | the stored verdict and its summary disagree, which stops the pattern from ever gaining confidence. |
+
+To repair:
+
+```bash
+docker compose exec sentinelready sentinelready --poison --clean
+```
+
+Repair clears the bad verdict so the next occurrence is analysed fresh. It
+costs one AI call per pattern, once. Nothing is lost — the pattern's history,
+occurrence count and confidence are untouched.
+
+Change the schedule, or turn it off, in `sentinelready.yaml`:
+
+```yaml
+maintenance:
+  poison_check_hour: 3    # or null to disable
+```
+
+---
+
 ## API Reference
 
 SentinelReady generates its own API reference from the running code, so it
