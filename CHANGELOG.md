@@ -5,6 +5,56 @@ Upgrade with `docker compose pull && docker compose up -d`.
 
 ---
 
+## 1.0.8 — 2026-09-07
+
+**Recommended for everyone.** SentinelReady can now find and repair bad
+entries in its own pattern library, and it tells you when it does.
+
+- **Self-repair.** SentinelReady learns a verdict for each alert pattern and
+  reuses it, which is what makes repeat alerts instant and free. Occasionally a
+  stored verdict goes bad — and a bad verdict never fixes itself, because it is
+  either never reused (so never re-examined) or always reused (so never
+  re-examined). It now checks daily at 03:00 and repairs what it finds.
+
+  You can also look yourself, any time, the same way you run `--doctor`:
+
+  ```bash
+  docker compose exec sentinelready ./nuitka_launcher.bin --cure
+  ```
+
+  That shows what is wrong and changes nothing. Add `--clean` to repair it.
+  See the README section "Pattern Library Health" for what each condition
+  means.
+
+- **Repairs are never silent.** Every repair appears in your next sitrep,
+  naming the pattern and what was wrong with it. SentinelReady does not change
+  its own learning without telling you.
+
+- **Your history is kept.** The pattern, how many times it has fired, when it
+  was first and last seen, and every recorded outcome are untouched. Only the
+  bad verdict goes — and with it the confidence score, because that score was
+  earned by agreeing with the verdict being discarded. The pattern re-earns
+  confidence over its next few occurrences, which is the honest position rather
+  than inheriting certainty from an answer that turned out to be wrong.
+
+- **A pattern that resolved is no longer overwritten.** When an alert resolved,
+  SentinelReady could replace whatever that pattern had learned with a generic
+  "escalate" verdict. That is fixed. If you have been seeing patterns drift
+  toward escalating when they used to be handled quietly, this is why.
+
+- Change the schedule, or turn it off, in `sentinelready.yaml`:
+
+  ```yaml
+  maintenance:
+    poison_check_hour: 3    # or null to disable
+  ```
+
+**Nothing to do beyond upgrading.** The first scheduled check will report what
+it found in your next sitrep. If you would rather look before it runs, use
+`--cure` — it changes nothing.
+
+---
+
 ## 1.0.7 — 2026-09-04
 
 **Recommended for everyone, and important if you run a local model on CPU.**
