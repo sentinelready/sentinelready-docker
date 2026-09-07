@@ -827,7 +827,7 @@ It checks for this daily at 03:00 and repairs what it finds. You can also look
 yourself:
 
 ```bash
-docker compose exec sentinelready ./nuitka_launcher.bin --poison
+docker compose exec sentinelready ./nuitka_launcher.bin --cure
 ```
 
 That shows what is wrong and changes nothing. It reports three things:
@@ -841,7 +841,7 @@ That shows what is wrong and changes nothing. It reports three things:
 To repair:
 
 ```bash
-docker compose exec sentinelready ./nuitka_launcher.bin --poison --clean
+docker compose exec sentinelready ./nuitka_launcher.bin --cure --clean
 ```
 
 Repair clears the bad verdict so the next occurrence is analysed fresh. It
