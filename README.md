@@ -845,8 +845,18 @@ docker compose exec sentinelready ./nuitka_launcher.bin --cure --clean
 ```
 
 Repair clears the bad verdict so the next occurrence is analysed fresh. It
-costs one AI call per pattern, once. Nothing is lost — the pattern's history,
-occurrence count and confidence are untouched.
+costs one AI call per pattern, once.
+
+**Your history is kept.** The pattern, how many times it has fired, when it was
+first and last seen, and every recorded outcome are untouched. Only the stored
+verdict goes — and with it the confidence score, because that score was earned
+by agreeing with the verdict being discarded. The pattern re-earns confidence
+in its new answer over the next few occurrences, which is the honest position
+rather than inheriting certainty from a verdict that turned out to be wrong.
+
+The one exception is a drifted summary: there the stored verdict is good and
+only its summary had diverged, so the summary is corrected and the confidence
+is kept.
 
 Change the schedule, or turn it off, in `sentinelready.yaml`:
 
