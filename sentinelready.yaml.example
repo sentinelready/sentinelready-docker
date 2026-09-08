@@ -247,6 +247,24 @@ history:
   events_file: /app/scripts/data/events.jsonl
 
 fingerprint:
+  # SentinelReady remembers its verdict for a pattern and reuses it, which is
+  # what makes repeat alerts instant and free. That is safe for a verdict that
+  # keeps quiet -- if it is wrong you get a delayed look, and it corrects the
+  # next time the pattern is analysed for any other reason.
+  #
+  # It is NOT safe for a verdict that pages you. That one costs an
+  # interruption every single time, forever, and it is never re-examined:
+  # a decision made once, possibly wrongly, becomes permanent.
+  #
+  # So any remembered verdict that would interrupt a person is re-checked with
+  # the AI instead of reused. Everything quiet still serves from memory.
+  verify_escalations: true
+  #
+  # How often a given pattern may be re-checked, in minutes. During a storm the
+  # same pattern is verified at most once per interval rather than on every
+  # occurrence -- this is what stops a local CPU model saturating. 0 verifies
+  # every time (fine on a hosted provider, risky on local inference).
+  verify_interval_minutes: 30
   db_path: /app/scripts/data/sentinel_fingerprints.db
   cache_enabled: true
   min_confidence: 0.7
