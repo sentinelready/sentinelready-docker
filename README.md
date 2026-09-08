@@ -759,16 +759,38 @@ environment:
 
 ## Cost Management
 
-If using a cloud AI provider (Claude, OpenAI) set a monthly spending
-limit before connecting SR to production alert traffic. SR processes
-every alert — a noisy environment can generate significant API calls in
-the first few weeks before pattern recognition reduces them.
+> **Bringing your own API key? Set a dollar spending limit with your
+> provider before you point production traffic at SentinelReady.**
+>
+> Do this first, not after. It is the only limit that can actually stop
+> your bill, and it takes about a minute:
+>
+> - **Claude API** — console.anthropic.com → Settings → Billing →
+>   **Monthly spend limit**. Start at **$20/mo**.
+> - **OpenAI API** — platform.openai.com → Settings → Billing →
+>   **Usage limits**. Start at **$20/mo**.
+>
+> A noisy environment generates the most API calls in its first few weeks,
+> before pattern recognition has learned anything. That is exactly when a
+> surprise bill would happen, and exactly when a limit protects you.
 
-Recommended limits for getting started:
-- Claude API: $20/mo at console.anthropic.com → Settings → Billing →
-  Monthly spend limit
-- OpenAI API: $20/mo at platform.openai.com → Settings → Billing →
-  Usage limits
+**Running a local model (the default) costs nothing per alert.** This whole
+section applies only if you switch to a hosted provider.
+
+### Three limits, and only one of them stops anything
+
+Know which is which before you rely on one:
+
+| Setting | Where | What it actually does |
+|---|---|---|
+| **Provider spending limit** | Claude/OpenAI console | **Hard stop in dollars.** The API refuses further calls. The only thing that can prevent a surprise bill. |
+| `ai.governor.max_calls_per_day` | `sentinelready.yaml` | **Hard stop in calls** (default 500/day). SentinelReady stops calling and fails open — alerts are still delivered, just without triage. |
+| `ai.daily_budget_usd` | `sentinelready.yaml` | **Warns only.** Sends one email a day once crossed and **stops nothing.** Do not treat this as a cap. |
+
+The call governor bounds spend even without a provider limit — at its 500/day
+default that is roughly **$11/day on Opus 5, $2/day on Haiku 4.5**. Set the
+provider limit anyway. The governor protects you from SentinelReady; only the
+provider limit protects you from everything else sharing that key.
 
 ### What it actually costs
 

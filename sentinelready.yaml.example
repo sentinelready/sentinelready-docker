@@ -65,6 +65,25 @@ ai:
   # cost_per_1k_input_tokens: 0.005
   # cost_per_1k_output_tokens: 0.025
   # daily_budget_usd: 5.00           # one warning email/day once crossed; 0 = off
+  #
+  # ⚠ daily_budget_usd WARNS. It does not cap. It sends one email a day once
+  #   crossed and stops nothing. Two things actually stop spend:
+  #
+  #     1. Your PROVIDER's dollar spending limit — the only hard stop in
+  #        dollars, and the only one that protects you from anything else
+  #        sharing that API key. Set this BEFORE pointing production alert
+  #        traffic at SentinelReady, not after the first bill.
+  #          Claude  : console.anthropic.com  -> Settings -> Billing -> Monthly spend limit
+  #          OpenAI  : platform.openai.com    -> Settings -> Billing -> Usage limits
+  #        $20/mo is a sensible starting point.
+  #
+  #     2. ai.governor.max_calls_per_day below (default 500) — a hard stop in
+  #        CALLS, not dollars. At 500/day that is roughly $11/day on Opus 5 or
+  #        $2/day on Haiku 4.5. Past it SentinelReady stops calling and fails
+  #        open: alerts still get delivered, just without triage.
+  #
+  #   A local model (the default) costs nothing per alert and none of this
+  #   applies. This matters the moment you switch to a hosted provider.
 
   # Whether the full original alert payload (not just the extracted
   # name/severity/description/value fields) gets included in the AI
