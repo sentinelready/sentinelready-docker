@@ -78,8 +78,8 @@ ai:
   #        $20/mo is a sensible starting point.
   #
   #     2. ai.governor.max_calls_per_day below (default 500) — a hard stop in
-  #        CALLS, not dollars. At 500/day that is roughly $11/day on Opus 5 or
-  #        $2/day on Haiku 4.5. Past it SentinelReady stops calling and fails
+  #        CALLS, not dollars -- what that costs depends on your model and your
+  #        provider's current rates. Past it SentinelReady stops calling and fails
   #        open: alerts still get delivered, just without triage.
   #
   #   A local model (the default) costs nothing per alert and none of this

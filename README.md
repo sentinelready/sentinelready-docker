@@ -787,9 +787,8 @@ Know which is which before you rely on one:
 | `ai.governor.max_calls_per_day` | `sentinelready.yaml` | **Hard stop in calls** (default 500/day). SentinelReady stops calling and fails open — alerts are still delivered, just without triage. |
 | `ai.daily_budget_usd` | `sentinelready.yaml` | **Warns only.** Sends one email a day once crossed and **stops nothing.** Do not treat this as a cap. |
 
-The call governor bounds spend even without a provider limit — at its 500/day
-default that is roughly **$11/day on Opus 5, $2/day on Haiku 4.5**. Set the
-provider limit anyway. The governor protects you from SentinelReady; only the
+The call governor bounds spend even without a provider limit, by capping how
+many calls can be made at all. Set the provider limit anyway. The governor protects you from SentinelReady; only the
 provider limit protects you from everything else sharing that key.
 
 ### What it costs
@@ -811,9 +810,10 @@ before pattern recognition has learned anything. Set the spending limit above
 before that week, not after it.
 
 Two things bound your spend regardless. `ai.governor.max_calls_per_day`
-(default 500) is a hard ceiling on AI calls — at 500/day that is roughly
-$11/day on Opus 5, $2/day on Haiku. And your provider's own spending limit,
-above, is the backstop if anything unexpected happens.
+(default 500) is a hard ceiling on how many AI calls can be made at all —
+what that costs depends on your model and your provider's rates. And your
+provider's own spending limit, above, is the backstop if anything unexpected
+happens.
 
 `ai.daily_budget_usd` is **not** a cap — it sends one warning email a day
 once crossed and stops nothing. The governor is the thing that actually
