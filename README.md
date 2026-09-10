@@ -792,24 +792,23 @@ default that is roughly **$11/day on Opus 5, $2/day on Haiku 4.5**. Set the
 provider limit anyway. The governor protects you from SentinelReady; only the
 provider limit protects you from everything else sharing that key.
 
-### What it actually costs
+### What it costs
 
-Measured 2026-08-31 against a full-size triage prompt — alert fields, four
-similar past incidents, environment context rules, a causal correlation,
-pattern-frequency data and the raw payload. That came to **1,041 input
-tokens and 657 output tokens**:
+**We do not publish per-alert prices.** They would be wrong within weeks: the
+amount of context SentinelReady sends changes as the product improves, and
+providers change their own rates. A number in this README that no longer
+matches your bill is worse than no number.
 
-| Provider / model | Per alert | Per 1,000 alerts |
-|---|---|---|
-| Claude Opus 5 | ~$0.022 | ~$22 |
-| Claude Sonnet 5 | ~$0.009 | ~$9 |
-| Claude Haiku 4.5 | ~$0.004 | ~$4 |
+Check your provider's current pricing, and note that **output tokens dominate**
+— they cost several times input, and there are usually more of them because
+current models reason before answering. Sending a bigger prompt is cheap;
+getting a longer answer is not. If you want to cut cost, a smaller model moves
+the number far more than trimming what you send.
 
-**Output tokens dominate** — they cost about 5x input and there are usually
-more of them, because current models reason before answering and that
-reasoning is billed as output. Sending a bigger prompt is cheap; getting a
-longer answer is not. If you want to cut cost, a smaller model moves the
-number far more than trimming what you send.
+**Watch your first week.** Your own provider dashboard is the only accurate
+source, and the first week is when a noisy environment is most expensive —
+before pattern recognition has learned anything. Set the spending limit above
+before that week, not after it.
 
 Two things bound your spend regardless. `ai.governor.max_calls_per_day`
 (default 500) is a hard ceiling on AI calls — at 500/day that is roughly
