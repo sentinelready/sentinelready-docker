@@ -969,4 +969,4 @@ project improves fastest when the people running it say what broke.
 - Ideas: email jeff@sentinelready.io
 - What broke: same
 
-Thank you for being here early.
+Thank you for running it.
