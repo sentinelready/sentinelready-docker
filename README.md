@@ -13,7 +13,7 @@ actually matters.
 ## System Requirements
 
 - **RAM**: 8GB minimum, 16GB comfortable. Most of this is Ollama running
-  the `llama3.1` model (~5-6GB resident) — SentinelReady itself is
+  the `mistral` model (~4.5GB resident) — SentinelReady itself is
   lightweight (well under 1GB).
 - **CPU**: 4 cores recommended. Ollama on CPU-only inference is slower
   per alert (a few seconds), but the Behavior Pattern Library means
@@ -65,7 +65,7 @@ cp sentinelready.yaml.example sentinelready.yaml
 docker compose up -d
 ```
 
-SentinelReady will pull Ollama automatically and download the llama3.1 model
+SentinelReady will pull Ollama automatically and download the `mistral` model
 on first start. First startup takes 3-5 minutes depending on your connection.
 
 ---

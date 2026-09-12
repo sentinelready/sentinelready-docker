@@ -27,7 +27,7 @@ services:
     # and fell back to a raw alert. Compose cannot read sentinelready.yaml,
     # so the model name comes from the environment here. If you change
     # ai.model, set SENTINEL_MODEL to match (see .env.example).
-    entrypoint: ["/bin/sh", "-c", "OLLAMA_HOST=http://ollama:11434 ollama pull ${SENTINEL_MODEL:-llama3.1}"]
+    entrypoint: ["/bin/sh", "-c", "OLLAMA_HOST=http://ollama:11434 ollama pull ${SENTINEL_MODEL:-mistral:7b-instruct-v0.3-q4_K_M}"]
     restart: "no"
 
   sentinelready:

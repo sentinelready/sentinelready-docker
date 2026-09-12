@@ -13,7 +13,19 @@ ai:
   # the cost. This setting isn't license-gated.
   enabled: true
   provider: ollama               # ollama | claude | openai_compatible
-  model: llama3.1                # Ollama model to use
+  model: mistral:7b-instruct-v0.3-q4_K_M                 # Ollama model to use
+  #
+  # Why mistral and not something larger: this model has to judge NUMBERS --
+  # whether 34% of a disk is a problem and 97% is. Several popular models
+  # cannot. Measured on six controlled cases, llama3.1 answered "interrupt
+  # someone now" to all six, and at 12% disk usage explained itself as
+  # "critically high, above 90%". mistral got all six right, twice, and fits
+  # in 4.4GB.
+  #
+  # If you change this, test it the same way before trusting it: send an
+  # alert at a harmless level and one at a dangerous level, and check that it
+  # can tell them apart. A model that grades everything urgent will page you
+  # for everything.
   # Where Ollama lives. The default points at the one docker-compose
   # starts for you — leave it alone if you're using the bundled setup.
   #

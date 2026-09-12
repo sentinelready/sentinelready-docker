@@ -5,6 +5,63 @@ Upgrade with `docker compose pull && docker compose up -d`.
 
 ---
 
+## 1.0.9 — unreleased
+
+**The default AI model has changed, and if you have `model:` set in your
+`sentinelready.yaml` you need to change it yourself to get the fix.**
+
+```yaml
+ai:
+  model: mistral:7b-instruct-v0.3-q4_K_M
+```
+
+### Why
+
+SentinelReady's job is deciding which alerts can wait. It was getting that
+decision wrong, and the reason turned out to be the default model: **llama3.1
+does not read the number in your alert.**
+
+Tested on six controlled cases — the same alert at disk usages from 2% to
+99.4% — llama3.1 answered "interrupt someone immediately" to **all six**. At
+12% full it explained itself as *"disk usage is critically high, above 90%"*,
+a figure that appears nowhere in the alert. It was pattern-matching on the
+words "disk" and "full" and never reading the value.
+
+That is why triage escalated nearly everything. It was not tuning, and it was
+not your alert rules.
+
+`mistral` got all six right, twice, reproducibly. It is smaller (4.4GB vs
+~5GB), so the memory requirement goes **down**, and it is Apache 2.0 licensed.
+
+Also evaluated and rejected: qwen2.5:14b (graded well but timed out writing
+summaries), qwen2.5:7b, granite3-dense:8b, phi4-mini, phi3:medium, gemma3:12b,
+llama3.2:3b. Only mistral scored full marks.
+
+### What you need to do
+
+**If you never set `ai.model`** — nothing. You get the new default on upgrade,
+and Ollama downloads it on first start (~4.4GB, a few minutes).
+
+**If you set `ai.model: llama3.1`** — your setting wins over our default, so
+you will keep the old behaviour until you change it. Edit
+`sentinelready.yaml`, set the model as above, and restart.
+
+**If you use a hosted provider** (Claude, OpenAI) — nothing changes. This only
+affects local Ollama models.
+
+### Honest note
+
+The model is pinned to an exact build rather than the moving `mistral` tag.
+Which model you run determines whether triage works at all, so it should not
+be able to change under you without a release saying so.
+
+We also reduced what the model is asked to do in one go. The routing decision
+— when you need to see this — is now asked on its own, before any summary is
+written, and summaries are only written for alerts that are actually
+interrupting you. That is fewer AI calls, not more.
+
+---
+
 ## 1.0.8 — 2026-09-07
 
 **Recommended for everyone.** SentinelReady can now find and repair bad
