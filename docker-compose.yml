@@ -21,7 +21,7 @@ services:
     depends_on:
       ollama:
         condition: service_healthy
-    # Issue #2 (beta, 2026-08-08): this hardcoded `llama3.1`, so changing
+    # Reported 2026-08-08: this hardcoded `llama3.1`, so changing
     # ai.model in sentinelready.yaml pulled nothing -- the configured model
     # was never fetched, and the first alert hung until the breaker timeout
     # and fell back to a raw alert. Compose cannot read sentinelready.yaml,

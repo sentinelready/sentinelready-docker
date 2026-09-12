@@ -1,4 +1,4 @@
-# Use an Ollama you already run, instead of the bundled one (beta issue #15).
+# Use an Ollama you already run, instead of the bundled one.
 #
 # The base docker-compose.yml always starts its own Ollama, and
 # sentinelready.yaml marked `ollama_host` as "Internal compose service —
@@ -51,7 +51,7 @@ services:
       # OLLAMA_HOST, not SENTINEL_OLLAMA_HOST (fixed 2026-09-02). The app
       # reads OLLAMA_HOST and nothing else; this overlay set a variable
       # nothing consumed, so it silently fell back to ai.ollama_host in
-      # sentinelready.yaml -- i.e. the overlay written to fix beta issue #15
+      # sentinelready.yaml -- i.e. the overlay that exists for this case
       # did not actually work, and failed in the quietest possible way: a
       # host that looked configured and was not.
       - OLLAMA_HOST=${OLLAMA_URL:?set OLLAMA_URL to your Ollama, e.g. http://192.168.1.50:11434}

@@ -1,4 +1,4 @@
-# GPU acceleration for Ollama — OPT-IN overlay (beta issue #1).
+# GPU acceleration for Ollama — OPT-IN overlay.
 #
 # The README said "if a GPU is present, Ollama uses it automatically."
 # That is true of Ollama itself, but NOT of Ollama in a container: Docker
