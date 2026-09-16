@@ -5,10 +5,42 @@ Upgrade with `docker compose pull && docker compose up -d`.
 
 ---
 
-## 1.0.9 — unreleased
+## 1.0.9 — 2026-09-16
 
-**The default AI model has changed, and if you have `model:` set in your
-`sentinelready.yaml` you need to change it yourself to get the fix.**
+**Recommended for everyone, and urgent if you receive alerts by email without
+an outbound webhook configured.**
+
+### Alerts graded "interrupt me now" were not being delivered
+
+In 1.0.8 and earlier, an alert that triage decided should interrupt you
+immediately was routed to a delivery channel that had never been implemented.
+It was a log line and a `TODO`. The decision was made correctly, recorded
+correctly, and counted in `/metrics` as an escalation — and then nothing was
+sent.
+
+Verified against the published 1.0.8 image: six alerts produced twelve
+escalations in `/metrics` and **zero delivery attempts**.
+
+**Who this affected.** If your alert delivery is email only, with no outbound
+webhook, you did not receive these. Only alerts carrying a sacred severity
+(`critical` by default, which page unconditionally and never depend on triage)
+reached you. If you have Slack or PagerDuty configured, you were not affected —
+those channels worked.
+
+This predates 1.0.8. We found it while auditing what the escalation counters
+actually counted, and it is fixed in this release: a page now means a delivery
+was attempted, not that a decision was made. The counter counts deliveries too,
+which is why your escalation numbers may read lower after upgrading — the old
+number included decisions that never reached anyone.
+
+Also fixed alongside it: three verdicts described themselves as "notify only"
+while delivering nothing, and the word "paged" was used to describe an
+intention rather than an event. Both now say what actually happens.
+
+### The default AI model has changed
+
+**If you have `model:` set in your `sentinelready.yaml` you need to change it
+yourself to get the fix.**
 
 ```yaml
 ai:
