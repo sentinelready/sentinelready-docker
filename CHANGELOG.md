@@ -5,7 +5,7 @@ Upgrade with `docker compose pull && docker compose up -d`.
 
 ---
 
-## 1.0.10 — 2026-09-16
+## 1.0.10 — 2026-09-18
 
 **Recommended for everyone.** SentinelReady now judges an alert's number
 against what it has actually seen from that alert before, instead of against
