@@ -5,6 +5,105 @@ Upgrade with `docker compose pull && docker compose up -d`.
 
 ---
 
+## 1.0.10 — 2026-09-16
+
+**Recommended for everyone.** SentinelReady now judges an alert's number
+against what it has actually seen from that alert before, instead of against
+nothing.
+
+### What changed
+
+Deciding whether an alert can wait means deciding whether its number is
+unusual. Until now SentinelReady asked the model to work that out on its own,
+and a small local model cannot — reliably, and in a way that is easy to
+reproduce. Given "this metric has run 610 to 720 seconds" and a reading of 38
+seconds, it answered *"within the recorded range."* Given a solar inverter
+rated 210–260 kW and a reading of 3 kW, it answered *"not close to any limit."*
+
+So SentinelReady now does that comparison itself, and tells the model what it
+found in plain language:
+
+> Across 26 occurrences this pattern has never been recorded below 210 kW.
+> It is now 3 kW — 70x below that floor.
+
+The model still makes the call about whether that deserves interrupting you.
+It is simply no longer asked to do arithmetic it is bad at.
+
+On our test set of twelve invented alerts — deliberately not Kubernetes ones,
+with units from cold chain, payroll, courier and claims systems — this took the
+default model from 3 of 12 correct to 12 of 12, reproduced exactly. Half those
+cases are alerts where the dangerous reading is unusually **low**, which is the
+case SentinelReady previously got wrong almost every time.
+
+### What you need to do
+
+Nothing. It is on by default and needs no configuration.
+
+### What to expect on day one
+
+**Nothing changes immediately, and that is expected.** SentinelReady has never
+recorded the value an alert fired at, so after upgrading it starts learning
+from zero — even for a pattern it has seen four hundred times. It needs about
+five occurrences of a given alert before it will describe a range as a range.
+
+Frequently-firing alerts cross that in a day. A monthly one takes a month.
+Until then SentinelReady says so honestly rather than guessing: an alert it
+cannot judge goes to your sitrep, where nothing is lost, and sacred severities
+page immediately regardless, exactly as before.
+
+This is the shape of the product: **every alert carrying a measurement makes
+the next judgement of that pattern better.**
+
+### Related alerts no longer page you about the wrong machine
+
+SentinelReady groups alerts that fire close together and tries to explain them
+as one incident. It was saying they were related **every single time** — 24 out
+of 24 on our own instance, across three days, never once declining. Alerts that
+shared nothing were being welded together.
+
+The result reached real pages. A volume at 2.0% full — correctly judged as
+something that could wait — was combined with an unrelated CPU alert on a
+different machine and delivered as *"potential resource exhaustion on
+k8s-node"*. Wrong machine, wrong urgency, and the volume's own 2.0% appeared
+nowhere in the message. Others asserted one alert was *"causing write failures
+and increased CPU usage"* on another, a connection nothing in the data
+supported.
+
+Three changes:
+
+- **Grouping no longer changes urgency.** Whether an alert interrupts you is
+  decided by triage, on that alert's own evidence. Correlation still tells you
+  what else fired at the same time — it just cannot turn something that could
+  wait into a 3am page, or quiet something that shouldn't wait.
+- **No invented causes.** Correlation describes what fired together. It no
+  longer asserts that one thing caused another.
+- **Every alert leads with what fired and what it read.** `HIGH: VolumeUsage =
+  2.0%` comes first, then any explanation. The name and the number come
+  straight from your monitoring; the explanation is the AI's account of it, and
+  it belongs after the facts.
+
+**This affects 1.0.9 and earlier.** If you have received a page whose headline
+described a system other than the one that alerted, this is why.
+
+### Also in this release
+
+- **`ai.timeout_seconds`** — how long one AI call may take before the alert is
+  delivered untriaged. Defaults to 300, unchanged. Worth lowering on fast
+  hardware, raising on slow. Fail-open is unchanged at any value: an alert that
+  outruns the budget is still delivered, marked "AI too slow, not triaged".
+
+- **Configuration files now merge properly.** Settings nested two levels deep
+  used to replace their whole parent section. Setting one value under
+  `resilience.breakers` removed the other circuit breakers — including the one
+  that protects SentinelReady during a database problem. Nothing failed
+  visibly; the protection was simply gone. If you have ever edited a nested
+  setting, this release restores the defaults you did not set.
+
+  Email delivery was not affected: those settings were re-applied further
+  downstream, so a partial `delivery.smtp` block always worked.
+
+---
+
 ## 1.0.9 — 2026-09-16
 
 **Recommended for everyone, and urgent if you receive alerts by email without
