@@ -5,6 +5,57 @@ Upgrade with `docker compose pull && docker compose up -d`.
 
 ---
 
+## 1.0.11 — 2026-09-19
+
+**Recommended for everyone.** Two fixes to how SentinelReady groups related
+alerts, and one that makes triage work correctly on an alert's very first
+occurrence.
+
+### Alerts firing across your whole fleet were invisible to grouping
+
+If the same alert fired on twenty machines at once, SentinelReady could not see
+it as one event. Internally an alert's identity does not include which machine
+it came from — that is deliberate, and it is what lets one learned pattern
+cover every device of a type — but the grouping logic then treated all twenty
+as a single already-seen alert and skipped them.
+
+A cluster-wide problem therefore arrived as twenty separate alerts with no
+indication they were the same thing.
+
+SentinelReady now counts the distinct machines an alert is firing on and says
+so plainly: *"the same alert is also firing on 6 other hosts in the last 15
+minutes."* Whether that is one incident, and how urgent it is, are still
+decided the same way as before.
+
+### Grouping was losing about one verdict in five
+
+The instructions SentinelReady sent its AI contained a malformed example, and
+roughly 20% of grouping decisions came back unreadable as a result. Those
+alerts were still delivered — nothing was ever dropped — but they arrived
+without the grouped explanation they should have had.
+
+Fixing it also fixed something we had not expected. SentinelReady had been
+answering "yes, these are related" to essentially everything; with readable
+instructions it now correctly declines unrelated alerts that merely happened to
+fire at the same time.
+
+### Triage now works on an alert's first occurrence
+
+SentinelReady learns what normal looks like for each alert, which means a brand
+new alert has no history to judge against. For percentages it no longer needs
+any: a percentage carries its own scale, and your alert's own wording says
+which end is dangerous — "95% full" and "95% free" mean opposite things.
+
+It now reads them correctly from the very first occurrence, with nothing for
+you to configure. Previously a volume at 2% full and one at 99.4% full could
+receive the same verdict.
+
+### What you need to do
+
+Nothing. All three are on by default and need no configuration.
+
+---
+
 ## 1.0.10 — 2026-09-18
 
 **Recommended for everyone.** SentinelReady now judges an alert's number

@@ -3,217 +3,570 @@
     {
       "name": "DS_PROMETHEUS",
       "label": "Prometheus",
-      "description": "Prometheus datasource scraping SentinelReady's /metrics endpoint",
       "type": "datasource",
       "pluginId": "prometheus",
       "pluginName": "Prometheus"
     }
   ],
-  "__requires": [
-    { "type": "grafana", "id": "grafana", "name": "Grafana", "version": "9.0.0" },
-    { "type": "datasource", "id": "prometheus", "name": "Prometheus", "version": "1.0.0" },
-    { "type": "panel", "id": "timeseries", "name": "Time series", "version": "" },
-    { "type": "panel", "id": "stat", "name": "Stat", "version": "" }
+  "title": "SentinelReady",
+  "uid": null,
+  "description": "Alert triage: how much reached you, how much waited for the morning report, and whether triage is actually running.",
+  "tags": [
+    "sentinelready",
+    "alerting",
+    "sre"
   ],
-  "title": "SentinelReady — Business Metrics",
-  "uid": "sentinelready-business",
-  "tags": ["sentinelready"],
-  "timezone": "browser",
   "schemaVersion": 39,
   "version": 1,
+  "editable": true,
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
   "refresh": "1m",
-  "time": { "from": "now-7d", "to": "now" },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Alerts received",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 5,
+        "h": 5
+      },
+      "description": "Every alert SentinelReady took in.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(sentinelready_alerts_processed_total)",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area"
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Interrupted someone",
+      "gridPos": {
+        "x": 5,
+        "y": 0,
+        "w": 5,
+        "h": 5
+      },
+      "description": "Alerts that paged a person. Everything else waited for the sitrep.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(sentinelready_escalations_total)",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area"
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Handled without paging",
+      "gridPos": {
+        "x": 10,
+        "y": 0,
+        "w": 6,
+        "h": 5
+      },
+      "description": "Share that reached you in the morning report instead of interrupting you. Depends on YOUR alert rules and which severities you make sacred -- it is not a product benchmark.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "100 * (sum(sentinelready_alerts_processed_total) - sum(sentinelready_escalations_total)) / clamp_min(sum(sentinelready_alerts_processed_total), 1)",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area"
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Patterns learned",
+      "gridPos": {
+        "x": 16,
+        "y": 0,
+        "w": 4,
+        "h": 5
+      },
+      "description": "Distinct alert patterns with a stored verdict.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(sentinelready_patterns_learned)",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area"
+      }
+    },
+    {
+      "type": "stat",
+      "title": "AI calls avoided",
+      "gridPos": {
+        "x": 20,
+        "y": 0,
+        "w": 4,
+        "h": 5
+      },
+      "description": "Answered from the pattern library instead of re-analysed.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(sentinelready_ai_calls_avoided_total)",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area"
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Triage health",
+      "gridPos": {
+        "x": 0,
+        "y": 5,
+        "w": 6,
+        "h": 5
+      },
+      "description": "0 = AI reachable and triaging. 1 = circuit breaker OPEN, alerts are being delivered RAW. Fail-open means you still get every alert, but without triage -- and nothing else tells you.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "max(sentinelready_breaker_state{breaker=~\"ollama|claude|openai_compatible\"})",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Triaging",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "DEGRADED \u2014 raw delivery",
+                  "color": "red"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area"
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Delivered without triage",
+      "gridPos": {
+        "x": 6,
+        "y": 5,
+        "w": 6,
+        "h": 5
+      },
+      "description": "Alerts that reached you raw because triage was unavailable. Nothing was lost -- but nothing was judged either. A rising number here means the AI is unreachable.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(sentinelready_raw_passthrough_total)",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area"
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Alerts vs interruptions",
+      "gridPos": {
+        "x": 12,
+        "y": 5,
+        "w": 12,
+        "h": 5
+      },
+      "description": "The gap between these two lines is the product working.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(sentinelready_alerts_processed_total[$__rate_interval]))",
+          "legendFormat": "received",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        },
+        {
+          "expr": "sum(rate(sentinelready_escalations_total[$__rate_interval]))",
+          "legendFormat": "interrupted someone",
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "fillOpacity": 10,
+            "lineWidth": 2
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "AI calls",
+      "gridPos": {
+        "x": 0,
+        "y": 10,
+        "w": 12,
+        "h": 6
+      },
+      "description": "Calls made against calls the pattern library saved.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(sentinelready_governor_calls_total[$__rate_interval]))",
+          "legendFormat": "calls made",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        },
+        {
+          "expr": "sum(rate(sentinelready_ai_calls_avoided_total[$__rate_interval]))",
+          "legendFormat": "avoided by the library",
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "fillOpacity": 10,
+            "lineWidth": 2
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Dependency failures",
+      "gridPos": {
+        "x": 12,
+        "y": 10,
+        "w": 12,
+        "h": 6
+      },
+      "description": "Failed calls per dependency. Sustained failures trip the breaker and triage degrades to raw delivery.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "expr": "sum by (breaker) (rate(sentinelready_breaker_calls_total{result=\"failure\"}[$__rate_interval]))",
+          "legendFormat": "{{breaker}}",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "fillOpacity": 10,
+            "lineWidth": 2
+          }
+        },
+        "overrides": []
+      }
+    }
+  ],
   "templating": {
     "list": [
       {
-        "name": "datasource",
+        "name": "DS_PROMETHEUS",
         "type": "datasource",
         "query": "prometheus",
-        "current": { "text": "${DS_PROMETHEUS}", "value": "${DS_PROMETHEUS}" },
-        "hide": 0
-      },
-      {
-        "name": "customer_code",
-        "type": "query",
-        "datasource": "${datasource}",
-        "query": "label_values(sentinelready_patterns_learned, customer_code)",
-        "refresh": 2,
-        "includeAll": true,
-        "multi": true,
-        "current": { "text": "All", "value": "$__all" }
+        "current": {},
+        "hide": 0,
+        "label": "Prometheus"
       }
     ]
-  },
-  "panels": [
-    {
-      "id": 1,
-      "title": "Alerts Processed (7d)",
-      "type": "stat",
-      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
-      "datasource": "${datasource}",
-      "targets": [
-        { "expr": "increase(sentinelready_alerts_processed_total[7d])", "legendFormat": "alerts" }
-      ],
-      "fieldConfig": { "defaults": { "decimals": 0, "color": { "mode": "thresholds" } } }
-    },
-    {
-      "id": 2,
-      "title": "Escalations (7d)",
-      "type": "stat",
-      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
-      "datasource": "${datasource}",
-      "targets": [
-        { "expr": "increase(sentinelready_escalations_total[7d])", "legendFormat": "escalations" }
-      ],
-      "fieldConfig": { "defaults": { "decimals": 0, "color": { "mode": "thresholds" } } }
-    },
-    {
-      "id": 3,
-      "title": "Sitreps Delivered (7d)",
-      "type": "stat",
-      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
-      "datasource": "${datasource}",
-      "targets": [
-        { "expr": "increase(sentinelready_sitreps_delivered_total[7d])", "legendFormat": "sitreps" }
-      ],
-      "fieldConfig": { "defaults": { "decimals": 0, "color": { "mode": "thresholds" } } }
-    },
-    {
-      "id": 4,
-      "title": "AI Calls Avoided (7d)",
-      "type": "stat",
-      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 },
-      "datasource": "${datasource}",
-      "targets": [
-        { "expr": "increase(sentinelready_ai_calls_avoided_total[7d])", "legendFormat": "cache hits" }
-      ],
-      "fieldConfig": { "defaults": { "decimals": 0, "color": { "mode": "thresholds" } } }
-    },
-    {
-      "id": 5,
-      "title": "Patterns Learned (current)",
-      "type": "stat",
-      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 0 },
-      "datasource": "${datasource}",
-      "targets": [
-        { "expr": "sum(sentinelready_patterns_learned{customer_code=~\"$customer_code\"})", "legendFormat": "patterns" }
-      ],
-      "fieldConfig": { "defaults": { "decimals": 0, "color": { "mode": "thresholds" } } }
-    },
-    {
-      "id": 6,
-      "title": "Est. Cost Savings (7d)",
-      "type": "stat",
-      "description": "AI calls avoided x $0.02/call estimated LLM inference cost. Adjust the multiplier in the panel edit screen to match your actual provider rate.",
-      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 0 },
-      "datasource": "${datasource}",
-      "targets": [
-        { "expr": "increase(sentinelready_ai_calls_avoided_total[7d]) * 0.02", "legendFormat": "USD saved" }
-      ],
-      "fieldConfig": { "defaults": { "decimals": 2, "unit": "currencyUSD", "color": { "mode": "thresholds" } } }
-    },
-    {
-      "id": 7,
-      "title": "Noise Reduction Rate",
-      "type": "timeseries",
-      "description": "1 - (escalations / alerts processed) -- the core 'meaningful alerts, not more alerts' value proposition over time.",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
-      "datasource": "${datasource}",
-      "targets": [
-        {
-          "expr": "1 - (sum(increase(sentinelready_escalations_total[1h])) / clamp_min(sum(increase(sentinelready_alerts_processed_total[1h])), 1))",
-          "legendFormat": "noise reduction"
-        }
-      ],
-      "fieldConfig": { "defaults": { "unit": "percentunit" } }
-    },
-    {
-      "id": 8,
-      "title": "Alerts Processed vs Escalations",
-      "type": "timeseries",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
-      "datasource": "${datasource}",
-      "targets": [
-        { "expr": "rate(sentinelready_alerts_processed_total[5m]) * 300", "legendFormat": "alerts processed" },
-        { "expr": "rate(sentinelready_escalations_total[5m]) * 300", "legendFormat": "escalations" }
-      ]
-    },
-    {
-      "id": 9,
-      "title": "Pattern Recognition Rate (cache hits / total)",
-      "type": "timeseries",
-      "description": "Share of incoming alerts matched against a learned fingerprint instead of requiring a fresh AI triage call.",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
-      "datasource": "${datasource}",
-      "targets": [
-        {
-          "expr": "sum(rate(sentinelready_ai_calls_avoided_total[1h])) / clamp_min(sum(rate(sentinelready_alerts_processed_total[1h])), 0.0001)",
-          "legendFormat": "pattern recognition rate"
-        }
-      ],
-      "fieldConfig": { "defaults": { "unit": "percentunit" } }
-    },
-    {
-      "id": 10,
-      "title": "Patterns Learned by Customer",
-      "type": "timeseries",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
-      "datasource": "${datasource}",
-      "targets": [
-        {
-          "expr": "sentinelready_patterns_learned{customer_code=~\"$customer_code\"}",
-          "legendFormat": "{{customer_code}}"
-        }
-      ]
-    },
-    {
-      "id": 11,
-      "title": "Est. On-Call $ Value (7d)",
-      "type": "stat",
-      "description": "If your team uses on-call pay per incident, this estimates $ saved from alerts that never needed to escalate to a human (processed - escalated) x $100/avoided escalation. Adjust the multiplier in the panel edit screen to match your team's actual on-call pay structure -- not every team pays per-incident, this isn't a universal claim.",
-      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 20 },
-      "datasource": "${datasource}",
-      "targets": [
-        { "expr": "(increase(sentinelready_alerts_processed_total[7d]) - increase(sentinelready_escalations_total[7d])) * 100", "legendFormat": "USD (est.)" }
-      ],
-      "fieldConfig": { "defaults": { "decimals": 0, "unit": "currencyUSD", "color": { "mode": "thresholds" } } }
-    },
-    {
-      "id": 12,
-      "title": "Patterns Worth Fixing — Still Open",
-      "type": "stat",
-      "description": "Count of chronic patterns (high_suppress_candidate / chronic_escalation / degrading) currently still recurring at a chronic rate. Updated nightly.",
-      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 20 },
-      "datasource": "${datasource}",
-      "targets": [
-        { "expr": "sentinelready_chronic_patterns_open", "legendFormat": "still open" }
-      ],
-      "fieldConfig": { "defaults": { "decimals": 0, "color": { "mode": "thresholds" } } }
-    },
-    {
-      "id": 13,
-      "title": "Patterns Worth Fixing — Resolved (7d)",
-      "type": "stat",
-      "description": "Chronic patterns that stopped recurring at a chronic rate in the last 7 days -- the honest signal that someone likely fixed the underlying issue.",
-      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 20 },
-      "datasource": "${datasource}",
-      "targets": [
-        { "expr": "increase(sentinelready_chronic_patterns_resolved_total[7d])", "legendFormat": "resolved" }
-      ],
-      "fieldConfig": { "defaults": { "decimals": 0, "color": { "mode": "thresholds" } } }
-    },
-    {
-      "id": 14,
-      "title": "Chronic Pattern Accountability Over Time",
-      "type": "timeseries",
-      "description": "Still-open chronic pattern count over time, alongside the cumulative resolved count -- flags whether recurring issues are actually getting fixed or just piling up.",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 20 },
-      "datasource": "${datasource}",
-      "targets": [
-        { "expr": "sentinelready_chronic_patterns_open", "legendFormat": "still open" },
-        { "expr": "sentinelready_chronic_patterns_resolved_total", "legendFormat": "resolved (cumulative)" }
-      ],
-      "fieldConfig": { "defaults": { "decimals": 0, "color": { "mode": "palette-classic" } } }
-    }
-  ]
+  }
 }
