@@ -5,7 +5,7 @@ Upgrade with `docker compose pull && docker compose up -d`.
 
 ---
 
-## 1.0.11 — 2026-09-19
+## 1.0.11 — 2026-09-20
 
 **Recommended for everyone.** Two fixes to how SentinelReady groups related
 alerts, and one that makes triage work correctly on an alert's very first
