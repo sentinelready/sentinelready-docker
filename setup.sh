@@ -17,7 +17,13 @@
 # leaves it to you.
 set -euo pipefail
 
-MODEL="${SENTINEL_MODEL:-llama3.1}"
+# Must match docker-compose.yml's pull default and sentinelready.yaml.example.
+# 1.0.9 changed the shipped default because llama3.1 does not read the number
+# in an alert -- it answered "interrupt someone now" to all six controlled
+# cases, including a 12%-full disk it called "critically high, above 90%".
+# This script and .env.example were missed in that change, so a new customer
+# following the documented setup still got llama3.1.
+MODEL="${SENTINEL_MODEL:-mistral:7b-instruct-v0.3-q4_K_M}"
 ENV_FILE=".env"
 
 say()  { printf '%s\n' "$*"; }
