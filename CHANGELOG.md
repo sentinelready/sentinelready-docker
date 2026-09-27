@@ -5,7 +5,7 @@ Upgrade with `docker compose pull && docker compose up -d`.
 
 ---
 
-## 1.0.12 — 2026-09-26
+## 1.0.12 — 2026-09-27
 
 **Recommended for everyone. Fixes the web dashboard, which did not load.**
 
