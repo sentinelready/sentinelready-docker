@@ -5,6 +5,34 @@ Upgrade with `docker compose pull && docker compose up -d`.
 
 ---
 
+## 1.0.12 — 2026-09-26
+
+**Recommended for everyone. Fixes the web dashboard, which did not load.**
+
+Every page of the web interface — dashboard, patterns, sitreps, delivery, sites,
+admin, docs — drew its layout and then showed "Loading..." indefinitely. A
+single malformed line in the shared JavaScript stopped the whole script from
+running, and every page depends on it.
+
+Alerting was never affected. Triage, delivery and sitreps all ran normally
+throughout; this was the dashboard only. If you configured SentinelReady from
+`sentinelready.yaml` and received alerts, you would not have noticed anything
+wrong. If you opened the dashboard, nothing loaded.
+
+Present in 1.0.8 through 1.0.11.
+
+**Why it took a while to find:** every automated check we run is server-side,
+and the pages returned a correct HTTP 200 with complete HTML every time. The
+failure only happens once a browser tries to run the script. There is now a
+test that parses the JavaScript of all seven pages on every build, so this
+particular class of fault cannot ship again.
+
+### What you need to do
+
+Upgrade. Nothing to configure.
+
+---
+
 ## 1.0.11 — 2026-09-20
 
 **Recommended for everyone.** Two fixes to how SentinelReady groups related
