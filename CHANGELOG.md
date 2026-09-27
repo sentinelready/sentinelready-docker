@@ -5,6 +5,37 @@ Upgrade with `docker compose pull && docker compose up -d`.
 
 ---
 
+## 1.0.13 — 2026-09-27
+
+**Recommended for everyone.** Fixes the Patterns Worth Fixing table in the
+sitrep view, which was unreadable, and one case where it could show the wrong
+advice.
+
+- **Recommendations read "[object Object]".** Every row of the table showed that
+  instead of the sentence it was meant to show.
+
+- **A recommendation could be shown against the wrong pattern.** The table
+  paired recommendations to patterns by position in a list, and the two lists
+  are built separately. They are now matched by pattern identity, so the advice
+  you see belongs to the pattern it is next to. This is the reason to upgrade
+  rather than wait.
+
+- **Service names appeared twice**, as "PVC Space Usage — alertmanager-0
+  (alertmanager-0)". The pattern name already includes the service.
+
+- **Pattern names containing acronyms are corrected as they recur.** Names
+  learned before an earlier fix read like "Node High C P U" instead of "Node
+  High CPU". The stored name is now refreshed each time a pattern fires, so
+  these correct themselves — you will see a mix until each pattern next occurs.
+
+Alerting, triage and delivery were not affected by any of these.
+
+### What you need to do
+
+Upgrade. Nothing to configure.
+
+---
+
 ## 1.0.12 — 2026-09-27
 
 **Recommended for everyone. Fixes the web dashboard, which did not load.**
