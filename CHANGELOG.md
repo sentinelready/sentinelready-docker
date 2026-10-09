@@ -5,6 +5,46 @@ Upgrade with `docker compose pull && docker compose up -d`.
 
 ---
 
+## 1.0.14 — 2026-10-09
+
+**Upgrade if your alerts arrive from Grafana.** A Grafana notification that
+carried more than one alert was triaged as if it carried one. The rest were
+accepted, stored, and never triaged or delivered — with nothing to tell you it
+had happened.
+
+- **Only the first alert in a group was triaged.** Grafana groups alerts before
+  it notifies, so one webhook commonly carries several. SentinelReady processed
+  one of them. A group of three firing alerts produced one triage and two
+  alerts that were never seen again. This is the reason to upgrade now rather
+  than wait.
+
+- **In a group that mixed firing and resolved alerts, the wrong alert could be
+  triaged.** The alert picked was whichever Grafana happened to list first,
+  which may be one that had already cleared. The triage then described the
+  resolved alert while the firing ones were ignored.
+
+- **Resolutions were recorded against the wrong pattern.** When a group
+  contained several resolved alerts, every resolution was filed under the first
+  alert in the group instead of the one that actually cleared. That is the data
+  behind "Answered from memory" and the Patterns Worth Fixing table, so both
+  could be reporting against the wrong pattern. Existing rows are not
+  rewritten; new ones are correct.
+
+Alerts from every other source — the generic and auto endpoints, CloudWatch,
+Datadog, Slack, UniFi — send one alert per request and were never affected.
+
+**One behaviour change to expect.** Burst detection looks at how many related
+alerts arrived recently. A group of twelve now counts as twelve, because it is.
+A large group can therefore be collapsed into a single burst summary where
+previously it was not — that is burst detection working on the real number for
+the first time.
+
+### What you need to do
+
+Upgrade. Nothing to configure.
+
+---
+
 ## 1.0.13 — 2026-09-27
 
 **Recommended for everyone.** Fixes the Patterns Worth Fixing table in the
