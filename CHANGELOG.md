@@ -5,6 +5,51 @@ Upgrade with `docker compose pull && docker compose up -d`.
 
 ---
 
+## 1.0.15 — 2026-10-11
+
+**Upgrade straight to this and skip 1.0.14.** If your alerts arrive from
+Grafana, 1.0.14 could fail to deliver an entire group of alerts rather than
+just some of it. This release fixes that. 1.0.13 and earlier are not affected
+by the fault below, though they have the original grouping bug 1.0.14 was
+written to fix — so 1.0.15 is the first release that handles grouped alerts
+correctly.
+
+- **A group of alerts could time out and be abandoned.** 1.0.14 correctly began
+  triaging every alert in a Grafana notification instead of only the first, but
+  it did that work while Grafana or Alertmanager waited on the reply. Triage
+  takes up to a minute and a half per alert, so a group of eight took eight to
+  twelve minutes — longer than the five minutes Alertmanager waits before it
+  gives up. It then abandoned the whole group and raised its own "failed to send
+  alerts" alarm, which was itself sent to SentinelReady, which timed out again.
+
+  Measured on our own staging environment: 951 of those alarms in twelve hours,
+  against eight genuinely firing alerts in the entire cluster.
+
+- **SentinelReady now accepts a group immediately and triages it behind the
+  scenes.** A group of eight is acknowledged in about three milliseconds
+  instead of minutes. The same eight alerts are still triaged, in the same way,
+  with the same results — the only change is that nothing is kept waiting. A
+  notification carrying a single alert is unchanged.
+
+- **New counters so this cannot go quiet again.** `/metrics` now reports
+  `sentinelready_triage_queue_depth` (how far behind triage is),
+  `sentinelready_triage_queued_total`, `sentinelready_triage_queue_full_total`
+  and `sentinelready_triage_deferred_failed_total`. If triage ever falls behind,
+  the depth figure says so rather than you finding out from silence.
+
+**A known limit, stated rather than hidden.** Queued alerts are triaged in the
+order they arrived, so a critical alert can wait behind several warnings.
+Sacred severities still always escalate — the delivery decision is unchanged —
+but the enrichment for one can be delayed when a large group arrives at once.
+Priority ordering is planned.
+
+### What you need to do
+
+Upgrade. Nothing to configure. If you are on 1.0.14 and use Grafana, do this
+now rather than at your convenience.
+
+---
+
 ## 1.0.14 — 2026-10-09
 
 **Upgrade if your alerts arrive from Grafana.** A Grafana notification that
